@@ -2,7 +2,7 @@ trigger:
   - main
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'Default'
 
 variables:
   dockerRepository: 'miracle2412/lab1-cicd'
