@@ -33,3 +33,13 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
         run: |
           python -m pytest -v
+
+  docker-pack-n-push:
+    needs: build-n-test
+    uses: ./.github/workflows/docker-pack-n-push.yml
+    with:
+      image_name: lab1-cicd
+      image_tag: latest
+    secrets:
+      DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+      DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
