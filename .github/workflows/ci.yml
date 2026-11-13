@@ -43,3 +43,28 @@ jobs:
     secrets:
       DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
       DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+
+  helm-package:
+    needs: build-n-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+
+      - name: Lint Helm chart
+        run: helm lint ./k8s
+
+      - name: Package Helm chart
+        run: |
+          mkdir -p helm-package
+          helm package ./k8s --destination ./helm-package
+
+      - name: Upload Helm chart artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: task-manager-helm-chart
+          path: ./helm-package/*.tgz
