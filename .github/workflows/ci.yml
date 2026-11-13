@@ -14,6 +14,24 @@ jobs:
   build-n-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: items_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d items_db"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/items_db
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -28,11 +46,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run database migrations
+        run: alembic upgrade head
+
       - name: Run unit tests
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: |
-          python -m pytest -v
+        run: python -m pytest -v
 
   docker-pack-n-push:
     needs: build-n-test
